@@ -1,43 +1,32 @@
 const express = require('express');
+const mongoose = require('mongoose');
+require('dotenv').config()
+const app = express();
 
-const server = express();
+app.use(express.json());
 
-server.use(express.json());
+app.use(
+    express.urlencoded({
+        extended: true
+    }),
+)
 
-const courses = ['fs_master', 'Game development', 'Living_from_youtube']
+app.use(express.json())
 
-server.get('/courses/:index', (req, res) => {
-    const { index } = req.params;
+app.get('/', (req, res) => {
+    return res.json({message: 'Hello world'})
+})
 
-    return res.json(courses[index]);
-});
+// CRUD
+const personRoutes = require('./routes/personRoutes')
 
-server.get('/courses', (req, res) => {
-    return res.json(courses);
-});
+app.use('/person', personRoutes)
 
-server.post('/courses', (req, res) => {
-    const { name } = req.body;
-    courses.push(name);
-
-    return res.json(courses);
-});
-
-server.put('/courses/:index', (req, res) => {
-    const { index } = req.params;
-    const { name } = req.body;
-    
-    courses[index] = name;
-
-    return res.json(courses);
-});
-
-server.delete('/courses/:index', (req, res) => {
-    const { index } = req.params;
-
-    courses.splice(index, 1);
-    
-    return res.json({'message': 'Course deleted'});
-});
-
-server.listen(3000)
+// Listener
+mongoose
+    .connect(process.env.DB)
+    .then(() => {
+        console.log('db connected.')
+        app.listen(3000)
+    })
+    .catch((err) => console.log(err))
